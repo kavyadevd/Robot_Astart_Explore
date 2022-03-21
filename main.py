@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def check_obstacle_space(x, y, clearance=0):
     try:
         width = [0+clearance, 400-clearance]
@@ -82,3 +81,22 @@ polygon1_points = [[115, 210], [80, 180], [105, 100], [36, 185]]
 polygon2_points = [[200, 140], [235, 120], [235, 80], [200, 60], [165, 80], [165, 120]]
 
 screen_size = width, height = 400, 250
+image = np.zeros((height, width, 3), np.uint8)
+image.fill(255)
+
+poly_color = [195,89,143]
+blue = [0, 0, 255]
+border_c = [64, 106, 151]
+
+
+def CreateObstacleMatrix(clearance):
+    obstacles = []
+    map_ = np.zeros((400, 250), np.uint8)
+    #map_ = np.zeros((250, 400), np.uint8)
+    for x in range(map_.shape[0]):
+        for y in range(map_.shape[1]):
+            if check_obstacle_space(x,y,clearance):
+                obstacles.append([x,y])
+                map_[x,y] = 255
+    img = cv2.flip(map_, 0)
+    return img, obstacles
