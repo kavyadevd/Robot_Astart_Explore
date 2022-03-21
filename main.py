@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import math
 import heapq
+from skimage.draw import line_aa
 
 class PQueue:
     def __init__(self):
@@ -14,6 +15,15 @@ class PQueue:
         return not self.node
 
 
+def Backtrack(prev, curr, next_):
+    current = next_
+    nodes = []
+    while current != curr:
+        nodes.append(current)
+        current = prev[current]
+    nodes.append(curr)
+    nodes.reverse()
+    return nodes
 
 def check_obstacle_space(x, y, clearance=0):
     try:
@@ -115,3 +125,81 @@ def CreateObstacleMatrix(clearance):
                 map_[x,y] = 255
     img = cv2.flip(map_, 0)
     return img, obstacles
+
+def GetMoves(theta, step):
+    # round(number * 2) / 2  To queue_pop closest 0.5
+    move1 = (step * (math.cos(math.radians(theta + (2 * 30)))),step * (math.sin(math.radians(theta + (2 * 30)))))
+    move1 = ( (round(move1[0]*2)/2) , (round(move1[1]*2)/2) )
+
+    move2 = (step * (math.cos(math.radians(theta + 30))),step * (math.sin(math.radians(theta + 30))))
+    move2 = ( (round(move2[0]*2)/2) , (round(move2[1]*2)/2) )
+
+    move3 = (step * (math.cos(math.radians(theta))),step * (math.sin(math.radians(theta))))
+    move3 = ( (round(move3[0]*2)/2) , (round(move3[1]*2)/2) )
+
+    move4 = (step * (math.cos(math.radians(theta - (2 * 30)))),step * (math.sin(math.radians(theta - (2 * 30)))))
+    move4 = ( (round(move4[0]*2)/2) , (round(move4[1]*2)/2) )
+
+    move5 = (step * (math.cos(math.radians(theta - 30))),step * (math.sin(math.radians(theta - 30))))
+    move5 = ( (round(move5[0]*2)/2) , (round(move5[1]*2)/2) )
+
+    return{"move1": (move1[0], move1[1], 60),"move2": (move2[0], move2[1], 30),"move3": (move3[0], move3[1], 0),"move4": (move4[0], move4[1], -30),"move5": (move5[0], move5[1], -60)}
+
+
+def CorrectAngle(angle,offset):
+    if offset+angle >= 360:
+        angle -= 360
+    if offset+angle < 0:
+        angle = 360 + angle
+    return angle
+
+m = ["move1","move2","move3","move4","move5"]
+def AStar(start, goal, step):
+    map, o_list = CreateObstacleMatrix(clearance)
+    pq = PQueue()
+    pq.insert_(start, 0)
+    prev_ = {start: None}
+    visited = {start: 0}
+    coordinates = list()
+    explore = []
+    path = []
+    while not pq.empty_():
+        current_cell = pq.queue_pop()
+        if ((current_cell[0] - goal[0]) ** 2) + ((current_cell[1] - goal[1]) ** 2) - (1.5 * step) ** 2 <= 0:
+            path_list = Backtrack(prev_, start, current_cell)
+            break
+        moves = GetMoves(current_cell[2], step)        
+        for i in m:
+            row_offset, col_offset, orientation = moves[i]
+            orientation = CorrectAngle(orientation,current_cell[2])
+            next = (current_cell[0] + row_offset, current_cell[1] + col_offset, current_cell[2] + orientation)
+            if  not ([int(next[0]),int(next[1])] in o_list) and next not in visited:
+                visited[next] = visited[current_cell] + 1
+                f_value = visited[current_cell] + 1 + abs(math.sqrt((goal[0] - next[0]) ** 2 + (goal[1] - next[1]) ** 2))
+
+                pq.insert_(next, f_value)
+                prev_[next] = current_cell
+                print("Explored:", next)
+                coordinates.append(next)
+                explore.append([next[0],next[1],next[2]])
+
+    for point in path_list:
+        path.append([point[0],point[1]])
+
+    #v2_viz(coordinates, path_list, 5)
+    return None
+
+
+take_input = False
+robot_radius, start_pos, goal_pos, clearance,step = 2,(6,6,30),(150,200,30),5,8
+if take_input:
+    robot_radius, start_pos, goal_pos, clearance,step = GetInput()
+map_, obstacles = CreateObstacleMatrix(clearance)
+AStar(start_pos, goal_pos, step)
+image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+image = cv2.flip(image, -1)
+image = cv2.flip(image, 0)
+cv2.imshow('Path', image)
+cv2.waitKey(0)
+cv2.imwrite("Output.png", image)
