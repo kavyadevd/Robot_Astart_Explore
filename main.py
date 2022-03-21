@@ -113,6 +113,83 @@ poly_color = [195,89,143]
 blue = [0, 0, 255]
 border_c = [64, 106, 151]
 
+def DrawMap(points, path):
+    global image
+    image = cv2.flip(image, 0)
+    image = cv2.flip(image, 1)
+    nppolygon1_points = np.array(polygon1_points,np.int32)
+    nppolygon1_points = nppolygon1_points.reshape(-1,1,2)
+    image = cv2.fillPoly(image, [nppolygon1_points], poly_color)
+
+    # Plot start goal points
+    image[start_pos[0], start_pos[1]] = [0, 0, 255]
+
+    cv2.putText(image, 'Start', (start_pos[0], start_pos[1]),
+                 cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1, cv2.LINE_AA)
+    image[goal_pos[0], goal_pos[1]] = [0, 0, 255]
+    cv2.putText(image, 'Goal', (goal_pos[0], goal_pos[1]),
+                 cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1, cv2.LINE_AA)
+
+    # Circle
+    image = cv2.circle(image, (300, 185), 40, poly_color, -1)
+
+    # Hexagon
+    nppolygon1_points = np.array(polygon2_points,np.int32)
+    image = cv2.fillPoly(image, [nppolygon1_points], poly_color)
+
+
+
+    image = cv2.circle(image, (300, 185), 45, border_c, 1)
+
+    # Plot point space : EXPLORED
+    image_ =image.copy()
+    prev = (int(points[0][1]),int(points[0][0]))
+    counter = 0
+    fivep=[]
+    for vis in points:
+        counter+=1
+        # cv2.arrowedLine(image_, (int(vis[0]), int(vis[1])),(int(path[i + 1][0]), 300 - int(path[i + 1][1])), (0, 0, 255), 1,
+        #                 cv2.LINE_AA)
+        x=int(vis[1])
+        y=int(vis[0])
+        fivep.append((x,y))
+        # x =  (int)(vis[1] + 2 * math.sin(vis[2]))
+        # y =  (int)(vis[0] + 2 * math.cos(vis[2]))
+        #try:
+        #cv2.arrowedLine(image_,(start_pos[1],start_pos[0]),(int(vis[1]),int(vis[0])) , (255,255,0),1,cv2.LINE_AA,0,2)
+        print(x,' : ',y,'\n')
+        #image_ = cv2.line(image_,prev,(x,y) , (255,255,0),1)
+
+        rows, cols, weights = line_aa(x, y, prev[0],prev[1])    # antialias line
+
+        w = weights.reshape([-1, 1])            # reshape anti-alias weights
+        lineColorRgb = [255,255,0]           # color of line, orange here
+
+        image_[rows, cols, 0:3] = (
+          np.multiply((1 - w) * np.ones([1, 3]),image_[rows, cols, 0:3]) +
+          w * np.array([lineColorRgb])
+        )
+        image_[x,y, :] = list(np.random.choice(range(256), size=3))
+
+
+        if counter%5==0:
+            prev = (fivep[2][0],fivep[2][1])
+            fivep = []
+        # except:
+        # #     pass
+        # img = image_.copy()
+        # img = cv2.flip(img, -1)
+        img = cv2.flip(image_, 0)
+        cv2.imshow("Moving", img)
+        #image = img
+        cv2.waitKey(1)
+    cv2.waitKey(0)
+
+    # Plot PATH
+    for p in path:
+        image = cv2.circle(image, (int(p[0]), int(p[1])), 2, blue, 1)
+        cv2.imwrite('FinalOutput.png',image)
+ 
 
 def CreateObstacleMatrix(clearance):
     obstacles = []
@@ -186,6 +263,7 @@ def AStar(start, goal, step):
     for point in path_list:
         path.append([point[0],point[1]])
 
+    DrawMap(explore,path)
     #v2_viz(coordinates, path_list, 5)
     return None
 
