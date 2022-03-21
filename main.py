@@ -187,8 +187,7 @@ def DrawMap(points, path):
 
     # Plot PATH
     for p in path:
-        image = cv2.circle(image, (int(p[0]), int(p[1])), 2, blue, 1)
-        cv2.imwrite('FinalOutput.png',image)
+        image = cv2.circle(image, (int(p[0]), int(p[1])), 2, blue, 1)        
  
 
 def CreateObstacleMatrix(clearance):
@@ -264,14 +263,13 @@ def AStar(start, goal, step):
         path.append([point[0],point[1]])
 
     DrawMap(explore,path)
-    #v2_viz(coordinates, path_list, 5)
     return None
 
 
-take_input = False
-robot_radius, start_pos, goal_pos, clearance,step = 2,(6,6,30),(150,200,30),5,8
-if take_input:
-    robot_radius, start_pos, goal_pos, clearance,step = GetInput()
+# take_input = False
+# robot_radius, start_pos, goal_pos, clearance,step = 2,(6,6,30),(150,200,30),5,8
+# if take_input:
+robot_radius, start_pos, goal_pos, clearance,step = GetInput()
 map_, obstacles = CreateObstacleMatrix(clearance)
 AStar(start_pos, goal_pos, step)
 image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
