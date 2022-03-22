@@ -18,3 +18,7 @@ Explore           |  Final Path
 ![OutPutVideo](https://user-images.githubusercontent.com/13993518/159384977-2ba46cb7-92f9-4ca5-94fb-79a9a225eed2.gif) | ![Output](https://user-images.githubusercontent.com/13993518/159384825-1181766f-e8b2-4b46-ada0-9eaffe6566aa.png)
 
 
+## Author
+1. Kavyashree Devadiga UID: 117398045
+2. Gautam Vanama
+
