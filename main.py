@@ -34,7 +34,7 @@ def check_obstacle_space(x, y, clearance=0):
 
         p2 = [[165, 120], [200, 140], [235, 120], [
             235, 80], [200, 60], [165, 80], [165, 120]]
-        pm2 = (p2[2][1] - p2[6][1]) / (p2[5][1] - p2[6][0])
+        pm2 = (p2[2][1] - p2[6][1]) / (p2[2][0] - p2[6][0])
 
         if (x < width[0]) or (x > width[1]) or (y < height[0]) or (y > height[1]):
             #print('\n Not within map coordinates \n')
@@ -122,12 +122,12 @@ def DrawMap(points, path):
     image = cv2.fillPoly(image, [nppolygon1_points], poly_color)
 
     # Plot start goal points
-    image[start_pos[0], start_pos[1]] = [0, 0, 255]
+    image[int(start_pos[0]), int(start_pos[1])] = [0, 0, 255]
 
-    cv2.putText(image, 'Start', (start_pos[0], start_pos[1]),
+    cv2.putText(image, 'Start', (int(start_pos[0]), int(start_pos[1])),
                  cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1, cv2.LINE_AA)
-    image[goal_pos[0], goal_pos[1]] = [0, 0, 255]
-    cv2.putText(image, 'Goal', (goal_pos[0], goal_pos[1]),
+    image[int(goal_pos[0]), int(goal_pos[1])] = [0, 0, 255]
+    cv2.putText(image, 'Goal', (int(goal_pos[0]), int(goal_pos[1])),
                  cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1, cv2.LINE_AA)
 
     # Circle
@@ -157,7 +157,7 @@ def DrawMap(points, path):
         # y =  (int)(vis[0] + 2 * math.cos(vis[2]))
         #try:
         #cv2.arrowedLine(image_,(start_pos[1],start_pos[0]),(int(vis[1]),int(vis[0])) , (255,255,0),1,cv2.LINE_AA,0,2)
-        print(x,' : ',y,'\n')
+        #print(x,' : ',y,'\n')
         #image_ = cv2.line(image_,prev,(x,y) , (255,255,0),1)
 
         rows, cols, weights = line_aa(x, y, prev[0],prev[1])    # antialias line
@@ -182,7 +182,8 @@ def DrawMap(points, path):
         img = cv2.flip(image_, 0)
         cv2.imshow("Moving", img)
         #image = img
-        cv2.waitKey(1)
+        cv2.waitKey(5)
+    cv2.imwrite('Explore.png',img)
     cv2.waitKey(0)
 
     # Plot PATH
